@@ -19,41 +19,49 @@ dir_exist_at_all = arg_contents.select { |x|
     File.directory? arg_dir + "/" + x
 }
 
-if dir_exist_at_all.any? # Enter block if at least one of the contents within the directory is another directory
-    only_dirs = []
+only_dirs = []
 
-    arg_contents.each { |x|
-        # arg_dir + String will not work when this is recursive
-        exact_file_loc = arg_dir + "/" + x
+arg_contents.each { |x|
+    # arg_dir + String will not work when this is recursive
+    exact_file_loc = arg_dir + "/" + x
 
-        if File.directory?(exact_file_loc)
-            only_dirs.push(exact_file_loc)
-        else
-            puts "'#{x}' is not a directory. Enter 'd' to DELETE or 's' to SKIP."
-            usr_input = $stdin.gets.chomp
+    if File.directory?(exact_file_loc)
+        only_dirs.push(exact_file_loc)
+    else
+        puts "'#{x}' is not a directory. Enter a new name for the file, 'd' to DELETE, or 's' to SKIP."
+        usr_input = $stdin.gets.chomp
 
-            if usr_input != "d" && usr_input != "s"
-                puts "That wasn't a valid input. Skipping '#{x}' by default..."
-            elsif usr_input == 'd'
-                puts "Are you sure you want to DELETE '#{x}'? Enter 'd' again to confirm, or 's' to SKIP."
-                confirmation = $stdin.gets.chomp
+        if usr_input == "s"
+            puts "Skipping '#{x}'."
+        elsif usr_input == 'd'
+            puts "Are you sure you want to DELETE '#{x}'? Enter 'd' again to confirm DELETE, or 's' to SKIP."
+            confirmation = $stdin.gets.chomp
 
-                if confirmation == "d"
-                    puts "Deleting '#{x}'"
-                    File.delete(exact_file_loc)
-                elsif confirmation == "s"
-                    puts "Skipping deletion of '#{x}'"
-                else
-                    puts "Not a valid input. Skipping deletion of '#{x}'"
-                end
+            if confirmation == "d"
+                puts "Deleting '#{x}'."
+                File.delete(exact_file_loc)
+            elsif confirmation == "s"
+                puts "Skipping deletion of '#{x}'."
             else
-                puts "Skipping '#{x}'"
+                puts "Not a valid input. Skipping deletion of '#{x}'."
+            end
+        else
+            puts "Will rename '#{x}' to '#{usr_input}'. Is this okay? Enter 'y' to RENAME, or 's' to SKIP."
+            confirmation = $stdin.gets.chomp
+
+            if confirmation == "y"
+                puts "Renaming '#{x}' to '#{usr_input}'."
+
+                new_file_name = arg_dir + "/" + usr_input
+                File.rename(exact_file_loc, new_file_name)
+            elsif confirmation == "s"
+                puts "Skipping the renaming of '#{x}'"
+            else
+                puts "Not a valid input. Skipping the renaming of '#{x}'."
             end
         end
-    }
-else # Enter block if the directory simply contains files and no directories
-    puts "YOU'VE ESCAPED!"
-end
+    end
+}
 
 
 
